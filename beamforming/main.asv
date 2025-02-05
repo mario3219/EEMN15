@@ -1,0 +1,7 @@
+clc
+load("PostRF_Phantom.mat");
+data = PostRF.Signal(:,:,1);
+
+Fs = 50e6;
+fltrd = highpass(data,9.37e6,Fs);
+image(fltrd)
