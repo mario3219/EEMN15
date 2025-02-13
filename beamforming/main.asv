@@ -1,31 +1,62 @@
 %% Dynamic focusing
 clc,clear
+
+% ladda data
 load("PreRF_ImageA.mat");
 data = preBeamformed.Signal;
 Fs = preBeamformed.SampleFreq;
 pitch = preBeamformed.Pitch;
 c = preBeamformed.SoundVel;
 
+% Beräkna sampel djup
+% samples 0->2048 motsvarar amplituder som funktion av tid, så sampel 100
+% motsvarar ett djup, sampel 300 ett annat osv...
 depths = (0:2048-1).*c/(2*Fs)+3*10^-3;
 
+% tom beamformed image, där varje focused linje ska lagras
 beamformedImage = zeros(2048,128);
 
+%matris för debugging
+new_data = zeros(2048,64);
+
 for line = 1:1:128
+    %hämta data för en linje, 2048x64
     line_data = preBeamformed.Signal(:,:,line);
-    %data = highpass(data,0.1e6,Fs);
+    %HP filter, bara kommentera ut
+    %line_data = highpass(line_data,0.1e6,Fs);
+    %tom vektor för en fokuserad linje
     focused_line = zeros(2048,1);
     for element = 1:1:64
+        %iterera varje sampel, som motsvarar ett viss djup
         for sample = 1:1:2048
+
+            %hämta djupet för en sampel, motsvarar djupet för mitten elementet
+            %därav fokus djupet
             depth = depths(sample);
+
+            %tiden det tar för mitten elementet att få en signal
             time_middle = 2*depth/c;
+
+            %beräkna avståndet från elementet som ska delayas till mitten
+            %elementet
             dx = pitch*abs(32-element);
+
+            %beräkna avståndet från elementet som ska delayas till fokus
+            %punkten
             d = sqrt(dx^2+depth^2);
+
+            %beräkna tiden för ekot från elementet som ska delayas till
+            %fokus punkten
             time = 2*d/c;
+
+            %delay som ska sättas blir skillnaden mellan tiden för mitten
+            %
             delay = time-time_middle;
             sample_delay = round(delay*Fs);
-            fixed_sample ?=
-            if sample_delay > 0 && sample_delay <= 2048
-                focused_line(sample) = focused_line(sample) + line_data(sample+sample_delay, element);
+            fixed_sample = sample+sample_delay;
+            if fixed_sample > 0 && fixed_sample <= 2048
+                focused_line(sample) = focused_line(sample) + line_data(fixed_sample, element);
+                new_data(sample,element) = line_data(fixed_sample, element);
             end
         end
     end
@@ -35,7 +66,30 @@ end
 Image=abs(hilbert(beamformedImage)); %where the fpostbeamformed"-variable is already filtered 
 figure; 
 imagesc(Image);
-colormap(gray)
+colormap(gray), title("Efter")
+
+%%
+
+prebeamformed = new_data;
+
+figure
+subplot(511)
+plot(prebeamformed(:,1,1)), hold on, xlim([810 900])
+subplot(512)
+plot(prebeamformed(:,15,1)), hold on, xlim([810 900])
+subplot(513)
+plot(prebeamformed(:,30,1)), hold on, xlim([810 900])
+subplot(514)
+plot(prebeamformed(:,45,1)), hold on, xlim([810 900])
+subplot(515)
+plot(prebeamformed(:,60,1)), hold on, xlim([810 900])
+
+prebeamformed = preBeamformed.Signal;
+%prebeamformed = highpass(prebeamformed,0.5e6,Fs);
+
+ThreeToTwo=squeeze(sum(prebeamformed,2));
+Image2=abs(hilbert(ThreeToTwo));
+figure; imagesc(Image2); colormap(gray)
 
 %%
 clc,clear
@@ -67,7 +121,7 @@ prebeamformed = preBeamformed.Signal;
 
 ThreeToTwo=squeeze(sum(prebeamformed,2));
 Image2=abs(hilbert(ThreeToTwo));
-figure; imagesc(Image2); colormap(gray)
+figure; imagesc(Image2); colormap(gray), title("Innan")
 
 %%
 
