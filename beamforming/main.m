@@ -61,7 +61,12 @@ for line = 1:1:128
 
             %hitta sampeln som är den egentliga som ska användas
             fixed_sample = sample+sample_delay;
-
+            
+            %if satsen kan göras mer noggrannt här, hitills finns några
+            %fel:
+            % * Om delayen som behövs går out-of-array-bounds, så kommer
+            %   den inte att delayas
+            %   Potentiell lösning: välj sampeln på index 2048 om OOB.
             if fixed_sample > 0 && fixed_sample <= 2048
                 %sparar den riktiga sampeln som ska användas, som hittats i
                 %hänsyn till delay, och summerar med alla andra lagrade
