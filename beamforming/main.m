@@ -7,11 +7,14 @@ data = preBeamformed.Signal;
 Fs = preBeamformed.SampleFreq;
 pitch = preBeamformed.Pitch;
 c = preBeamformed.SoundVel;
+deadzone = preBeamformed.DeadZone;
+deadzone_sample = round((deadzone/c)*Fs);
+elementWidth = preBeamformed.ElementWidth;
 
 % Beräkna sampel djup
 % samples 0->2048 motsvarar amplituder som funktion av tid, så sampel 100
 % motsvarar ett djup, sampel 300 ett annat osv...
-depths = (0:2048-1).*c/(2*Fs)+3*10^-3;
+depths = (1:2048)*c/(Fs)+deadzone;
 
 % tom beamformed image, där varje focused linje ska lagras
 beamformedImage = zeros(2048,128);
@@ -24,14 +27,13 @@ for line = 1:1:128
     line_data = preBeamformed.Signal(:,:,line);
 
     %HP filter, bara kommentera ut
-    %line_data = highpass(line_data,0.1e6,Fs);
 
     %tom vektor för en fokuserad linje
     focused_line = zeros(2048,1);
 
     for element = 1:1:64
         %iterera varje sampel, som motsvarar ett viss djup
-        for sample = 1:1:2048
+        for sample = deadzone_sample:1:2048
 
             %hämta djupet för en sampel, motsvarar djupet för mitten elementet
             %därav fokus djupet
@@ -42,7 +44,7 @@ for line = 1:1:128
 
             %beräkna avståndet från elementet som ska delayas till mitten
             %elementet
-            dx = pitch*abs(32-element);
+            dx = pitch*abs(32-element-1);%+elementWidth*abs(32-element);
 
             %beräkna avståndet från elementet som ska delayas till fokus
             %punkten
@@ -83,28 +85,27 @@ for line = 1:1:128
     %till i indexerad plats i beamform image
     beamformedImage(:,line) = focused_line;
 end
-
+beamformedImage = highpass(beamformedImage,0.5e5,Fs);
 Image=abs(hilbert(beamformedImage)); %where the fpostbeamformed"-variable is already filtered 
 figure; 
 imagesc(Image);
-colormap(gray), title("Efter")
+colormap(gray)
 
 %%
-
 prebeamformed = new_data;
 
 figure
 subplot(511)
-plot(prebeamformed(:,1,1)), hold on, xlim([810 900])
+plot(prebeamformed(:,1)), hold on, xlim([810 900])
 subplot(512)
-plot(prebeamformed(:,15,1)), hold on, xlim([810 900])
+plot(prebeamformed(:,31)), hold on, xlim([810 900])
 subplot(513)
-plot(prebeamformed(:,30,1)), hold on, xlim([810 900])
+plot(prebeamformed(:,32)), hold on, xlim([810 900])
 subplot(514)
-plot(prebeamformed(:,45,1)), hold on, xlim([810 900])
+plot(prebeamformed(:,45)), hold on, xlim([810 900])
 subplot(515)
-plot(prebeamformed(:,60,1)), hold on, xlim([810 900])
-
+plot(prebeamformed(:,64)), hold on, xlim([810 900])
+%%
 prebeamformed = preBeamformed.Signal;
 %prebeamformed = highpass(prebeamformed,0.5e6,Fs);
 
@@ -115,10 +116,10 @@ figure; imagesc(Image2); colormap(gray)
 %%
 clc,clear
 load("PostRF_Phantom.mat");
-data = PostRF.Signal(:,:,1);
+data = PostRF.Signal;
 
 Fs = 50e6;
-fltrd = highpass(data,0.5e6,Fs);
+fltrd = highpass(data,0.5e3,Fs);
 Image=abs(hilbert(fltrd)); %where the fpostbeamformed"-variable is already filtered 
 figure; 
 imagesc(Image);
@@ -138,7 +139,7 @@ load("PreRF_ImageA.mat");
 Fs = 50e6;
 
 prebeamformed = preBeamformed.Signal;
-%prebeamformed = highpass(prebeamformed,0.5e6,Fs);
+prebeamformed = highpass(prebeamformed,0.5e7,Fs);
 
 ThreeToTwo=squeeze(sum(prebeamformed,2));
 Image2=abs(hilbert(ThreeToTwo));
