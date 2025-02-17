@@ -2,14 +2,14 @@
 clc,clear
 
 % ladda data
-load("PreRF_ImageA.mat");
-data = preBeamformed.Signal;
+load("PreRF_ImageC.mat");
 Fs = preBeamformed.SampleFreq;
 pitch = preBeamformed.Pitch;
 c = preBeamformed.SoundVel;
 deadzone = preBeamformed.DeadZone;
 deadzone_sample = round((deadzone/c)*Fs);
 elementWidth = preBeamformed.ElementWidth;
+channels = preBeamformed.Channels;
 
 % Beräkna sampel djup
 % samples 0->2048 motsvarar amplituder som funktion av tid, så sampel 100
@@ -31,9 +31,9 @@ for line = 1:1:128
     %tom vektor för en fokuserad linje
     focused_line = zeros(2048,1);
 
-    for element = 1:1:64
+    for element = 1:1:channels
         %iterera varje sampel, som motsvarar ett viss djup
-        for sample = deadzone_sample:1:2048
+        for sample = 1:1:2048
 
             %hämta djupet för en sampel, motsvarar djupet för mitten elementet
             %därav fokus djupet
@@ -43,8 +43,9 @@ for line = 1:1:128
             time_middle = 2*depth/c;
 
             %beräkna avståndet från elementet som ska delayas till mitten
-            %elementet
-            dx = pitch*abs(32-element-1);%+elementWidth*abs(32-element);
+            %elementet, pitch=avstånd från mitt till mitt av element, 0.5:
+            %avstånd från element till absolut mitt (jämnt antal element)
+            dx = pitch*abs(channels/2-element+0.5);
 
             %beräkna avståndet från elementet som ska delayas till fokus
             %punkten
@@ -85,7 +86,7 @@ for line = 1:1:128
     %till i indexerad plats i beamform image
     beamformedImage(:,line) = focused_line;
 end
-beamformedImage = highpass(beamformedImage,0.5e5,Fs);
+beamformedImage = highpass(beamformedImage,0.5e6,Fs);
 Image=abs(hilbert(beamformedImage)); %where the fpostbeamformed"-variable is already filtered 
 figure; 
 imagesc(Image);
@@ -96,15 +97,15 @@ prebeamformed = new_data;
 
 figure
 subplot(511)
-plot(prebeamformed(:,1)), hold on, xlim([810 900])
+plot(prebeamformed(:,1)), hold on, xlim([850 950])
 subplot(512)
-plot(prebeamformed(:,31)), hold on, xlim([810 900])
+plot(prebeamformed(:,15)), hold on, xlim([850 950])
 subplot(513)
-plot(prebeamformed(:,32)), hold on, xlim([810 900])
+plot(prebeamformed(:,32)), hold on, xlim([850 950])
 subplot(514)
-plot(prebeamformed(:,45)), hold on, xlim([810 900])
+plot(prebeamformed(:,45)), hold on, xlim([850 950])
 subplot(515)
-plot(prebeamformed(:,64)), hold on, xlim([810 900])
+plot(prebeamformed(:,64)), hold on, xlim([850 950])
 %%
 prebeamformed = preBeamformed.Signal;
 %prebeamformed = highpass(prebeamformed,0.5e6,Fs);
