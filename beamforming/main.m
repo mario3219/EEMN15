@@ -2,7 +2,7 @@
 clc,clear
 
 % ladda data
-load("PreRF_ImageC.mat");
+load("PreRF_ImageB.mat");
 Fs = preBeamformed.SampleFreq;
 pitch = preBeamformed.Pitch;
 c = preBeamformed.SoundVel;
@@ -86,143 +86,45 @@ for line = 1:1:128
     %till i indexerad plats i beamform image
     beamformedImage(:,line) = focused_line;
 end
-beamformedImage = highpass(beamformedImage,0.5e6,Fs);
+beamformedImage = highpass(beamformedImage,4e6,Fs);
 Image=abs(hilbert(beamformedImage)); %where the fpostbeamformed"-variable is already filtered 
 figure; 
 imagesc(Image);
 colormap(gray)
 
-%%
+%% Inspect individual lines
 prebeamformed = new_data;
 
 figure
 subplot(511)
-plot(prebeamformed(:,1)), hold on, xlim([850 950])
+plot(prebeamformed(:,1))
 subplot(512)
-plot(prebeamformed(:,15)), hold on, xlim([850 950])
+plot(prebeamformed(:,15))
 subplot(513)
-plot(prebeamformed(:,32)), hold on, xlim([850 950])
+plot(prebeamformed(:,32))
 subplot(514)
-plot(prebeamformed(:,45)), hold on, xlim([850 950])
+plot(prebeamformed(:,45))
 subplot(515)
-plot(prebeamformed(:,64)), hold on, xlim([850 950])
-%%
-prebeamformed = preBeamformed.Signal;
-%prebeamformed = highpass(prebeamformed,0.5e6,Fs);
+plot(prebeamformed(:,64))
 
-ThreeToTwo=squeeze(sum(prebeamformed,2));
-Image2=abs(hilbert(ThreeToTwo));
-figure; imagesc(Image2); colormap(gray)
-
-%%
+%% PostRF
 clc,clear
 load("PostRF_Phantom.mat");
 data = PostRF.Signal;
 
-Fs = 50e6;
-fltrd = highpass(data,0.5e3,Fs);
-Image=abs(hilbert(fltrd)); %where the fpostbeamformed"-variable is already filtered 
-figure; 
-imagesc(Image);
-colormap(gray)
-
-%%
-Fs = 50e6;
-ThreeToTwo=squeeze(sum(data,2));
 Image=abs(hilbert(data)); %where the fpostbeamformed"-variable is already filtered 
 figure; 
 imagesc(Image);
 colormap(gray)
 
-%%
+%% Inspect image before beamforming
 clc,clear
-load("PreRF_ImageA.mat");
-Fs = 50e6;
+load("PreRF_ImageB.mat");
+Fs = preBeamformed.SampleFreq;
 
 prebeamformed = preBeamformed.Signal;
-prebeamformed = highpass(prebeamformed,0.5e7,Fs);
 
 ThreeToTwo=squeeze(sum(prebeamformed,2));
-Image2=abs(hilbert(ThreeToTwo));
-figure; imagesc(Image2); colormap(gray), title("Innan")
-
-%%
-
-prebeamformed = preBeamformed.Signal;
-
-figure
-subplot(511)
-plot(prebeamformed(:,1,1)), hold on, xlim([810 900])
-subplot(512)
-plot(prebeamformed(:,15,1)), hold on, xlim([810 900])
-subplot(513)
-plot(prebeamformed(:,30,1)), hold on, xlim([810 900])
-subplot(514)
-plot(prebeamformed(:,45,1)), hold on, xlim([810 900])
-subplot(515)
-plot(prebeamformed(:,60,1)), hold on, xlim([810 900])
-
-prebeamformed = preBeamformed.Signal;
-%prebeamformed = highpass(prebeamformed,0.5e6,Fs);
-
-ThreeToTwo=squeeze(sum(prebeamformed,2));
+ThreeToTwo = highpass(ThreeToTwo,4e6,Fs);
 Image2=abs(hilbert(ThreeToTwo));
 figure; imagesc(Image2); colormap(gray)
-
-%%
-clc,clear
-load("PreRF_ImageA.mat");
-data = preBeamformed.Signal;
-
-goal_height = size(data,1,1);
-Fs = 50e6;
-
-data = preBeamformed.Signal(:,:,:);
-for n = 1:1:128
-    idx_middle = find(data(:,32,n) == max(data(:,32,n)));
-    idx_middle = idx_middle(1);
-    for t = 1:1:64
-        idx_to_be_delayed = find(data(:,t,n) == max(data(:,t,n)));
-        idx_to_be_delayed = idx_to_be_delayed(1);
-        delay = idx_to_be_delayed - idx_middle;
-
-        new_column = vertcat(zeros(delay,1), data(:,t,n));
-        new_column = new_column(1:goal_height);
-        data(:,t,n) = new_column;
-    end
-end
-ThreeToTwo=squeeze(sum(data,2));
-Image2=abs(hilbert(ThreeToTwo));
-figure; imagesc(Image2); colormap(gray)
-%%
-data = preBeamformed.Signal;
-ThreeToTwo=squeeze(sum(data,2));
-Image2=abs(hilbert(ThreeToTwo));
-figure; imagesc(Image2); colormap(gray)
-%%
-data = preBeamformed.Signal;
-figure
-subplot(511)
-plot(data(:,1,1)), hold on, xlim([810 900])
-subplot(512)
-plot(data(:,15,1)), hold on, xlim([810 900])
-subplot(513)
-plot(data(:,30,1)), hold on, xlim([810 900])
-subplot(514)
-plot(data(:,45,1)), hold on, xlim([810 900])
-subplot(515)
-plot(data(:,60,1)), hold on, xlim([810 900])
-
-%%
-data = preBeamformed.Signal;
-figure
-subplot(511)
-plot(data(:,1,1))
-subplot(512)
-plot(data(:,15,1))
-subplot(513)
-plot(data(:,30,1))
-subplot(514)
-plot(data(:,45,1))
-subplot(515)
-plot(data(:,60,1))
