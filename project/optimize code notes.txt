@@ -1,0 +1,28 @@
+* If calculations are done several times, store as variables
+* Use multi-threaded loops where loops aren't dependant on past iterations
+* Use griddedInterpolant instead of interp2
+
+% Using interp2 for a one-shot interpolation:
+Zq = interp2(X, Y, Z, Xq, Yq, 'linear');
+
+% Using griddedInterpolant for repeated queries:
+F = griddedInterpolant({x, y}, Z, 'linear');
+Zq = F(Xq, Yq);
+
+* Offload processes to the gpu using gpuArray instead of normal arrays
+
+Usage gpuArray example:
+
+% Create large random matrices on the CPU
+A = rand(1000);
+B = rand(1000);
+
+% Transfer arrays to the GPU
+A_gpu = gpuArray(A);
+B_gpu = gpuArray(B);
+
+% Perform matrix multiplication on the GPU
+C_gpu = A_gpu * B_gpu;
+
+% Retrieve the result back to the CPU memory
+C = gather(C_gpu);
