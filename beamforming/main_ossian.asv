@@ -1,8 +1,8 @@
 clc,clear
 
-imageA = beamformImage("PreRF_ImageA.mat");
-imageB = beamformImage("PreRF_ImageB.mat");
-imageC = beamformImage("PreRF_ImageC.mat");
+imageA = beamformImage("PreRF_ImageA.mat","false");
+imageB = beamformImage("PreRF_ImageB.mat","false");
+imageC = beamformImage("PreRF_ImageC.mat","false");
 ImagePostRF = PostRFImage;
 
 subplot(221),imagesc(imageA),colormap(gray),title("ImageA");
@@ -10,9 +10,15 @@ subplot(222),imagesc(imageB),colormap(gray),title("ImageB");
 subplot(223),imagesc(imageC),colormap(gray),title("ImageC");
 subplot(224),imagesc(ImagePostRF),colormap(gray),title("ImagePostRF");
 
+
 % Dynamic focusing
-function Image = beamformImage(ImageName)
-    fprintf("Beamforming " + ImageName + " with apodization" + "..." + "\n");
+function Image = beamformImage(ImageName,apodization)
+    if strcmp(apodization,"false")
+        fprintf("Beamforming " + ImageName + "..." + "\n");
+    else
+        fprintf("Beamforming " + ImageName + " with apodization" + "..." + "\n");
+        apodization = hanning(channels);
+    end
     % ladda data
     load(ImageName);
     Fs = preBeamformed.SampleFreq;
@@ -28,9 +34,6 @@ function Image = beamformImage(ImageName)
     
     % tom beamformed image, där varje focused linje ska lagras
     beamformedImage = zeros(2048,128); 
-
-    % Apodization window
-    apodization = hanning(channels);  % Hanning apodization
     
     for line = 1:1:128
         %hämta data för en linje, 2048x64
@@ -85,8 +88,8 @@ function Image = beamformImage(ImageName)
                     %sparar den riktiga sampeln som ska användas, som hittats i
                     %hänsyn till delay, och summerar med alla andra lagrade
                     %samples
-                    weighted_signal = apodization(element) * line_data(fixed_sample, element);
-                    focused_line(sample) = focused_line(sample) + weighted_signal;
+                    %if strcmp(apodization,"false")
+                    focused_line(sample) = focused_line(sample) + line_data(fixed_sample, element);
                 end
             end
         end
