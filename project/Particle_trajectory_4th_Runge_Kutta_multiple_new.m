@@ -4,7 +4,7 @@ rhof=0.997e3; %medium density
 rhop=1.05e3; %particle density
 Cf=1.496e3; %medium speed of sound
 vis=0.893e-3; %medium viscosity
-a=1e-6/2; %particle radius
+a=0.5e-6/2; %particle radius
 W=375e-6; %channel width
  
 Kappaf=1/rhof/Cf^2; %medium compressibility
