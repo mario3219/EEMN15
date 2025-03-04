@@ -12,7 +12,7 @@ subplot(224),imagesc(ImagePostRF),colormap(gray),title("ImagePostRF");
 
 % Dynamic focusing
 function Image = beamformImage(ImageName)
-    fprintf("Beamforming " + ImageName + "..." + "\n");
+    fprintf("Beamforming " + ImageName + " with apodization" + "..." + "\n");
     % ladda data
     load(ImageName);
     Fs = preBeamformed.SampleFreq;
@@ -28,6 +28,9 @@ function Image = beamformImage(ImageName)
     
     % tom beamformed image, där varje focused linje ska lagras
     beamformedImage = zeros(2048,128); 
+
+    % Apodization window
+    apodization = hanning(channels);  % Hanning apodization
     
     for line = 1:1:128
         %hämta data för en linje, 2048x64
@@ -82,7 +85,8 @@ function Image = beamformImage(ImageName)
                     %sparar den riktiga sampeln som ska användas, som hittats i
                     %hänsyn till delay, och summerar med alla andra lagrade
                     %samples
-                    focused_line(sample) = focused_line(sample) + line_data(fixed_sample, element);
+                    weighted_signal = apodization(element) * line_data(fixed_sample, element);
+                    focused_line(sample) = focused_line(sample) + weighted_signal;
                 end
             end
         end
