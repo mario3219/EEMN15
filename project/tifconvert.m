@@ -1,9 +1,9 @@
 clc; clear;
 
-process("1.97_MHz_1_stack_MMStack_Default.ome.tif");
-process("1.97_MHz_2_stack_MMStack_Default.ome.tif");
-process("3.84_MHz_1_stack_MMStack_Default.ome.tif");
-process("3.84_MHz_2_stack_MMStack_Default.ome.tif");
+%process("1.97_MHz_1_stack_MMStack_Default.ome.tif");
+%process("1.97_MHz_2_stack_MMStack_Default.ome.tif");
+%process("3.84_MHz_1_stack_MMStack_Default.ome.tif");
+%process("3.84_MHz_2_stack_MMStack_Default.ome.tif");
 process("streaming_1_stack_MMStack_Default.ome.tif");
 process("streaming_2_stack_MMStack_Default.ome.tif");
 

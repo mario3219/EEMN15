@@ -4,7 +4,7 @@ rhof=0.997e3; %medium density
 rhop=1.05e3; %particle density
 Cf=1.496e3; %medium speed of sound
 vis=0.893e-3; %medium viscosity
-a=0.5e-6/2; %particle radius
+a=4.8e-6/2; %particle radius
 W=375e-6; %channel width
  
 Kappaf=1/rhof/Cf^2; %medium compressibility
@@ -12,11 +12,11 @@ Kappap=2.49e-10; %particle compressibility
 Beta=Kappap/Kappaf;
 f1=1-Beta;
 f2=2*(rhop-rhof)/(2*rhop+rhof);
-coeff=f1/3+f2/2; %acoustic contrast factor of particle
+coeff=-(f1/3+f2/2); %acoustic contrast factor of particle
 
 h=133e-6; %channel height
 g=9.8; 
-ky=pi/W; %wave number
+ky=2*pi/W; %wave number
 Eac=30; %acoustic energy density
 v1=2*sqrt(Eac/rhof); %acoustic velocity of fluid particles
 N=1801;
